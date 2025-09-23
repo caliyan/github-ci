@@ -23,6 +23,12 @@ kube_env_dir="$KUBE_ROOT/$KUBE_ENV"
 
 if [ -d "$kube_shared_dir" ]; then
     for file in "$kube_shared_dir"/*; do
+        # Skip gotenberg in preview (deployment / service / ingress)
+        if [[ "$KUBE_ENV" == "preview" && "$file" == *"gotenberg-"* ]]; then
+            echo "clean :: skipping shared gotenberg resource in preview - $file"
+            continue
+        fi
+
         echo "clean :: cleaning from shared config - $kube_shared_dir/$file"
         envsubst <"$file" | kubectl delete --ignore-not-found=true -f -
     done
